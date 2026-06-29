@@ -32,7 +32,7 @@ body{background:var(--bg);min-height:100dvh;display:flex;flex-direction:column;a
 html{background:#0a0a0a}
 
 /* ── MAIN CLOCK AREA ── */
-.clock-wrap{position:relative;width:min(92vw,480px);aspect-ratio:1;transition:opacity .35s;}
+.clock-wrap{position:relative;width:min(92vw,92vh,700px);aspect-ratio:1;transition:opacity .35s;}
 .clock-wrap.hidden{display:none}
 .clock-face{width:100%;height:100%;border-radius:50%;background:radial-gradient(ellipse at 35% 30%,var(--face1) 0%,var(--face2) 70%);box-shadow:0 0 0 4px var(--rim),0 0 0 7px var(--rim2),0 6px 32px rgba(0,0,0,.22),inset 0 2px 5px rgba(255,255,255,.10);position:relative;overflow:hidden;transition:background .4s,box-shadow .4s}
 .clock-face::before{content:'';position:absolute;inset:0;border-radius:50%;background:radial-gradient(ellipse at 40% 20%,rgba(255,255,255,.06) 0%,transparent 60%);pointer-events:none}
@@ -42,12 +42,12 @@ canvas#cc{position:absolute;inset:0;width:100%;height:100%;border-radius:50%}
 /* ── DIGITAL ── */
 .dig-wrap{display:flex;flex-direction:column;align-items:center;gap:6px;transition:all .35s}
 .dig-wrap.hidden{display:none}
-.dig-time{font-family:'Inter',sans-serif;font-weight:700;font-size:clamp(3rem,17vw,6.6rem);letter-spacing:.04em;color:var(--acc);transition:color .3s,text-shadow .3s,font-size .2s,font-family .2s;line-height:1.05;white-space:nowrap;text-align:center;display:flex;align-items:baseline;justify-content:center}
+.dig-time{font-family:'Inter',sans-serif;font-weight:700;font-size:clamp(3rem,17vw,10rem);letter-spacing:.04em;color:var(--acc);transition:color .3s,text-shadow .3s,font-size .2s,font-family .2s;line-height:1.05;white-space:nowrap;text-align:center;display:flex;align-items:baseline;justify-content:center}
 .dig-time .colon{display:inline-block;opacity:.5;flex-shrink:0}
 .dig-pair{display:inline-flex;flex-shrink:0}
 .dig-d{display:inline-block;width:.68em;text-align:center;font-variant-numeric:tabular-nums}
-.dig-date{font-family:'Inter',sans-serif;font-weight:300;font-size:clamp(.88rem,4vw,1.1rem);color:var(--date-col);letter-spacing:.16em;text-transform:uppercase;transition:color .3s}
-.analog-date{font-family:'Inter',sans-serif;font-weight:300;font-size:clamp(.88rem,4vw,1.1rem);color:var(--date-col);letter-spacing:.16em;text-transform:uppercase;text-align:center;margin-top:10px;transition:color .3s}
+.dig-date{font-family:'Inter',sans-serif;font-weight:300;font-size:clamp(.88rem,3vw,1.6rem);color:var(--date-col);letter-spacing:.16em;text-transform:uppercase;transition:color .3s}
+.analog-date{font-family:'Inter',sans-serif;font-weight:300;font-size:clamp(.88rem,3vw,1.6rem);color:var(--date-col);letter-spacing:.16em;text-transform:uppercase;text-align:center;margin-top:10px;transition:color .3s}
 .analog-date.hidden{display:none}
 
 /* ── COUNTDOWN WIDGET ── */
@@ -132,7 +132,16 @@ body.is-fullscreen .cd-widget{width:min(94vw,94vh)}
 body.is-fullscreen .sw-widget{width:min(94vw,94vh)}
 body.is-fullscreen .mode-badge{border-color:rgba(128,128,128,.4);background:rgba(128,128,128,.25);backdrop-filter:blur(6px);color:var(--num,#ccc)}
 
-/* Tombol X keluar fullscreen — pojok kanan atas */
+/* ── LAYAR BESAR: TV / Monitor ── */
+@media (min-width:1080px){
+  body{gap:20px}
+  .clock-wrap{width:min(70vh,70vw,680px)}
+  .dig-time{font-size:clamp(5rem,12vw,14rem)}
+  .dig-date,.analog-date{font-size:clamp(1rem,2.2vw,2rem);letter-spacing:.22em}
+  .mode-bar{height:64px;gap:0}
+  .mode-tab{min-width:90px;font-size:.75rem}
+  .tab-icon svg{width:24px;height:24px}
+}
 
 /* ── SOUND BUTTON INSIDE RING ── */
 .cd-sound-btn{
@@ -266,11 +275,9 @@ body.orientation-resolved #landscape-exit{
   letter-spacing:.18em;
   text-transform:uppercase;
 }
-/* orientation-locked = layar SUDAH landscape (HP terkunci, laptop, TV).
-   Gunakan vw sebagai basis + container-query trick via font-size dinamis.
-   "00:00:00" = 8 karakter tabular ~ 0.595em lebar masing-masing.
-   Target: teks mengisi ~88% lebar layar → 88vw / (8 × 0.595) ≈ 18.5vw/char
-   Dibatasi 68vh agar tidak terpotong di layar pendek (laptop 768px tinggi). */
+/* Saat orientation-locked, viewport device SUDAH landscape asli.
+   Pakai vw sebagai basis. "00:00:00" 8 karakter ~ 18.5vw mengisi ~88% lebar.
+   Dibatasi 68vh agar tidak terpotong di laptop layar pendek. */
 body.orientation-locked #landscape-time{
   font-size:min(18.5vw, 68vh);
 }
@@ -1214,10 +1221,9 @@ function lsScheduleNext(){
 // resolve (lihat afterFs di setLandscape), jadi tidak perlu mekanisme retry
 // terpisah — kalau lock gagal di sini, fallback CSS rotate yang bekerja.
 async function tryLockLandscape(){
-  // Deteksi apakah layar SUDAH landscape secara native (laptop/desktop/TV)
-  // Jika ya, tidak perlu CSS rotate — langsung pakai layout orientation-locked
+  // Cek apakah layar SUDAH landscape (laptop/TV/tablet rebahan)
+  // Jika ya dan lock gagal → pakai layout normal, bukan CSS rotate
   const alreadyLandscape = window.innerWidth > window.innerHeight;
-
   try{
     if(screen.orientation && screen.orientation.lock){
       await screen.orientation.lock('landscape');
@@ -1228,18 +1234,16 @@ async function tryLockLandscape(){
       return true;
     }
   } catch(e){
-    // Lock ditolak (umum kalau API tidak diizinkan di WebView/MIUI tertentu,
-    // atau browser lama/iOS/desktop) → cek apakah perlu CSS rotate atau tidak.
+    // Lock ditolak (desktop, iOS, WebView tertentu)
   }
-  // Lock gagal — kalau layar sudah landscape (laptop/TV/tablet tidur),
-  // tambahkan orientation-locked agar tampilan TIDAK di-rotate CSS
-  // (rotate CSS di layar yang sudah landscape = tampilan miring 90°).
-  // Kalau layar portrait (HP tegak, lock gagal) → fallback CSS rotate normal.
+  // Lock gagal: kalau sudah landscape → orientation-locked (no rotate CSS)
+  //             kalau portrait (HP tegak) → fallback CSS rotate
   if(alreadyLandscape){
     document.body.classList.add('orientation-locked');
   } else {
     document.body.classList.remove('orientation-locked');
   }
+  // Keputusan final sudah pasti → boleh tampilkan konten.
   document.body.classList.add('orientation-resolved');
   return false;
 }
