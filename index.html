@@ -61,36 +61,21 @@
     white-space: nowrap;
   }
 
-  /* close button */
-  #x {
-    position: fixed;
-    top: 14px; left: 14px;
-    width: 38px; height: 38px;
-    border-radius: 50%;
-    border: 1.5px solid #252535;
-    background: transparent;
-    display: flex; align-items: center; justify-content: center;
-    z-index: 99;
-    cursor: pointer;
-    transition: opacity 0.3s;
-  }
-  #x svg { pointer-events: none; }
-  body.fs #x { opacity: 0; pointer-events: none; }
+
 </style>
 </head>
 <body>
-
-<button id="x" title="Tutup" aria-label="Tutup">
-  <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-    <line x1="1" y1="1" x2="11" y2="11" stroke="#555570" stroke-width="1.8" stroke-linecap="round"/>
-    <line x1="11" y1="1" x2="1" y2="11" stroke="#555570" stroke-width="1.8" stroke-linecap="round"/>
-  </svg>
-</button>
 
 <div id="time" aria-live="polite">
   <span id="hh">00</span><span class="sep">:</span><span id="mm">00</span><span class="sep">:</span><span id="ss">00</span>
 </div>
 <div id="date"></div>
+
+<!-- Video dummy anti-layar-mati. Ukuran penuh layar agar tidak diblokir Chrome.
+     Tertutup background body — tidak terlihat, tapi Android tetap anggap "aktif". -->
+<video id="nosleep-video" muted loop playsinline webkit-playsinline preload="auto"
+  style="position:fixed;inset:0;width:100%;height:100%;object-fit:cover;z-index:-1;pointer-events:none;display:none"
+  src="data:video/mp4;base64,AAAAIGZ0eXBpc29tAAACAGlzb21pc28yYXZjMW1wNDEAAAMRbW9vdgAAAGxtdmhkAAAAAAAAAAAAAAAAAAAD6AAAA+gAAQAAAQAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAjt0cmFrAAAAXHRraGQAAAADAAAAAAAAAAAAAAABAAAAAAAAA+gAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAABAAAAAAAIAAAACAAAAAAAkZWR0cwAAABxlbHN0AAAAAAAAAAEAAAPoAAAAAAABAAAAAAGzbWRpYQAAACBtZGhkAAAAAAAAAAAAAAAAAABAAAAAQABVxAAAAAAALWhkbHIAAAAAAAAAAHZpZGUAAAAAAAAAAAAAAABWaWRlb0hhbmRsZXIAAAABXm1pbmYAAAAUdm1oZAAAAAEAAAAAAAAAAAAAACRkaW5mAAAAHGRyZWYAAAAAAAAAAQAAAAx1cmwgAAAAAQAAAR5zdGJsAAAAunN0c2QAAAAAAAAAAQAAAKphdmMxAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAIAAgBIAAAASAAAAAAAAAABFUxhdmM2MC4zMS4xMDIgbGlieDI2NAAAAAAAAAAAAAAAGP//AAAAMGF2Y0MBQsAe/+EAGGdCwB7ZH4iIwEQAAAMABAAAAwAIPFi5IAEABWjLg8sgAAAAEHBhc3AAAAABAAAAAQAAABRidHJ0AAAAAAAAFDAAABQwAAAAGHN0dHMAAAAAAAAAAQAAAAEAAEAAAAAAHHN0c2MAAAAAAAAAAQAAAAEAAAABAAAAAQAAABRzdHN6AAAAAAAAAoYAAAABAAAAFHN0Y28AAAAAAAAAAQAAA0EAAABidWR0YQAAAFptZXRhAAAAAAAAACFoZGxyAAAAAAAAAABtZGlyYXBwbAAAAAAAAAAAAAAAAC1pbHN0AAAAJal0b28AAAAdZGF0YQAAAAEAAAAATGF2ZjYwLjE2LjEwMAAAAAhmcmVlAAACjm1kYXQAAAJwBgX//2zcRem95tlIt5Ys2CDZI+7veDI2NCAtIGNvcmUgMTY0IHIzMTA4IDMxZTE5ZjkgLSBILjI2NC9NUEVHLTQgQVZDIGNvZGVjIC0gQ29weWxlZnQgMjAwMy0yMDIzIC0gaHR0cDovL3d3dy52aWRlb2xhbi5vcmcveDI2NC5odG1sIC0gb3B0aW9uczogY2FiYWM9MCByZWY9MyBkZWJsb2NrPTE6MDowIGFuYWx5c2U9MHgxOjB4MTExIG1lPWhleCBzdWJtZT03IHBzeT0xIHBzeV9yZD0xLjAwOjAuMDAgbWl4ZWRfcmVmPTEgbWVfcmFuZ2U9MTYgY2hyb21hX21lPTEgdHJlbGxpcz0xIDh4OGRjdD0wIGNxbT0wIGRlYWR6b25lPTIxLDExIGZhc3RfcHNraXA9MSBjaHJvbWFfcXBfb2Zmc2V0PS0yIHRocmVhZHM9MSBsb29rYWhlYWRfdGhyZWFkcz0xIHNsaWNlZF90aHJlYWRzPTAgbnI9MCBkZWNpbWF0ZT0xIGludGVybGFjZWQ9MCBibHVyYXlfY29tcGF0PTAgY29uc3RyYWluZWRfaW50cmE9MCBiZnJhbWVzPTAgd2VpZ2h0cD0wIGtleWludD0yNTAga2V5aW50X21pbj0xIHNjZW5lY3V0PTQwIGludHJhX3JlZnJlc2g9MCByY19sb29rYWhlYWQ9NDAgcmM9Y3JmIG1idHJlZT0xIGNyZj0yMy4wIHFjb21wPTAuNjAgcXBtaW49MCBxcG1heD02OSBxcHN0ZXA9NCBpcF9yYXRpbz0xLjQwIGFxPTE6MS4wMACAAAAADmWIhAV///8PRQABQt+A"></video>
 
 <script>
   const DAYS   = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
@@ -118,17 +103,80 @@
   tick();
   setInterval(tick, 1000);
 
-  // fullscreen
+  // ── WAKE LOCK ──────────────────────────────────────────────────────────────
+  // Dua lapis perlindungan agar layar tidak mati:
+  // 1) Wake Lock API (navigator.wakeLock) — cara resmi, butuh https/secure context
+  // 2) Video loop dummy — cadangan untuk file://, MIUI, HarmonyOS, browser lama
+  //    yang sering paksa-lepas Wake Lock API karena optimasi baterai.
+
+  const nosleepVideo = document.getElementById('nosleep-video');
+  let wakeLock = null;
+  let wakeLockRetryTimer = null;
+
+  function startNoSleepVideo(){
+    if(!nosleepVideo) return;
+    nosleepVideo.style.display = 'block';
+    const p = nosleepVideo.play();
+    if(p && p.catch) p.catch(()=>{});
+  }
+  function stopNoSleepVideo(){
+    if(!nosleepVideo) return;
+    nosleepVideo.pause();
+    nosleepVideo.style.display = 'none';
+  }
+  // Putar ulang kalau video kepause sendiri selagi fullscreen aktif
+  nosleepVideo && nosleepVideo.addEventListener('pause', ()=>{
+    if(isFull && document.visibilityState === 'visible') startNoSleepVideo();
+  });
+
+  async function requestWakeLock(){
+    startNoSleepVideo();
+    try{
+      if('wakeLock' in navigator){
+        wakeLock = await navigator.wakeLock.request('screen');
+        wakeLock.addEventListener('release', ()=>{
+          wakeLock = null;
+          // Auto-retry kalau dilepas paksa oleh sistem selagi masih fullscreen
+          if(isFull && document.visibilityState === 'visible'){
+            clearTimeout(wakeLockRetryTimer);
+            wakeLockRetryTimer = setTimeout(requestWakeLock, 700);
+          }
+        });
+      }
+    } catch(e){}
+  }
+  function releaseWakeLock(){
+    clearTimeout(wakeLockRetryTimer);
+    if(wakeLock){ wakeLock.release().catch(()=>{}); wakeLock = null; }
+    stopNoSleepVideo();
+  }
+  // Re-acquire saat tab kembali aktif
+  document.addEventListener('visibilitychange', ()=>{
+    if(isFull && document.visibilityState === 'visible' && !wakeLock) requestWakeLock();
+  });
+  // Watchdog: cek tiap 5 detik, ambil ulang kalau terlepas tanpa event
+  setInterval(()=>{
+    if(isFull && document.visibilityState === 'visible' && !wakeLock) requestWakeLock();
+  }, 5000);
+
+  // ── FULLSCREEN ─────────────────────────────────────────────────────────────
   let isFull = false;
   function enterFS(){
     const el = document.documentElement;
-    const fn = el.requestFullscreen || el.webkitRequestFullscreen || el.mozRequestFullScreen;
-    if(fn) fn.call(el).catch(()=>{});
+    const fsPromise = (el.requestFullscreen?.({navigationUI:'hide'}) || el.webkitRequestFullscreen?.())
+      ?.catch(()=> el.requestFullscreen?.().catch(()=>{}));
     document.body.classList.add('fs');
     isFull = true;
-    try{ screen.orientation.lock('landscape').catch(()=>{}); }catch(e){}
+    // Aktifkan wake lock SETELAH fullscreen resolve (lebih andal di Android)
+    const afterFs = ()=>{ requestWakeLock(); try{ screen.orientation.lock('landscape').catch(()=>{}); }catch(e){} };
+    if(fsPromise && typeof fsPromise.then === 'function'){
+      fsPromise.then(afterFs).catch(afterFs);
+    } else {
+      setTimeout(afterFs, 200);
+    }
   }
   function exitFS(){
+    releaseWakeLock();
     const fn = document.exitFullscreen || document.webkitExitFullscreen || document.mozCancelFullScreen;
     if(fn) fn.call(document).catch(()=>{});
     document.body.classList.remove('fs');
@@ -137,16 +185,12 @@
   }
 
   document.body.addEventListener('click', e => {
-    if(document.getElementById('x').contains(e.target)) return;
     isFull ? exitFS() : enterFS();
-  });
-  document.getElementById('x').addEventListener('click', e => {
-    e.stopPropagation(); exitFS();
   });
   ['fullscreenchange','webkitfullscreenchange'].forEach(ev =>
     document.addEventListener(ev, () => {
       if(!document.fullscreenElement && !document.webkitFullscreenElement){
-        document.body.classList.remove('fs'); isFull = false;
+        document.body.classList.remove('fs'); isFull = false; releaseWakeLock();
       }
     })
   );
