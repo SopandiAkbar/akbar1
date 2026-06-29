@@ -39,7 +39,7 @@
     font-weight: 700;
     font-variant-numeric: tabular-nums;
     letter-spacing: -0.01em;
-    color: #c8c8e8;
+    color: #d4cfc8;
     line-height: 1;
     -webkit-font-smoothing: antialiased;
     font-size: min(24.5vw, 62vh);
@@ -47,7 +47,7 @@
   }
 
   #time .sep {
-    color: #c8c8e8;
+    color: #d4cfc8;
     opacity: 0.35;
   }
 
@@ -195,6 +195,15 @@
     })
   );
   document.addEventListener('contextmenu', e => e.preventDefault());
+
+  // Trik WebOS: kirim event mousemove dummy tiap 30 detik agar
+  // screensaver TV LG tidak aktif karena menganggap user idle.
+  setInterval(() => {
+    document.dispatchEvent(new MouseEvent('mousemove', {
+      bubbles: true, cancelable: true,
+      clientX: Math.random(), clientY: Math.random()
+    }));
+  }, 30000);
 </script>
 </body>
 </html>
