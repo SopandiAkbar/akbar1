@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Akbar Clock</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html, body {
+    width: 100%; height: 100%;
+    background: #0f0f12;
+    overflow: hidden;
+    touch-action: none;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+    cursor: pointer;
+  }
+
+  body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2vmin;
+  }
+
+  /*
+    HH:MM:SS = 8 karakter
+    Setiap karakter lebar ≈ 0.58em (Helvetica bold tabular)
+    Total teks ≈ 8 × 0.58em = 4.64em
+    Agar pas: 4.64 × fontSize ≤ 96vw  →  fontSize ≤ 96vw / 4.64 ≈ 20.7vw
+    Batasi juga agar tinggi tidak melebihi ~55vh
+    Gunakan min(20vw, 55vh) → mengisi di semua orientasi
+  */
+  #time {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.01em;
+    color: #c8c8e8;
+    line-height: 1;
+    -webkit-font-smoothing: antialiased;
+    font-size: min(24.5vw, 62vh);
+    white-space: nowrap;
+  }
+
+  #time .sep {
+    color: #c8c8e8;
+    opacity: 0.35;
+  }
+
+  #date {
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    font-weight: 400;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: #5a5a78;
+    font-size: min(3.8vw, 9vh);
+    white-space: nowrap;
+  }
+
+  /* close button */
+  #x {
+    position: fixed;
+    top: 14px; left: 14px;
+    width: 38px; height: 38px;
+    border-radius: 50%;
+    border: 1.5px solid #252535;
+    background: transparent;
+    display: flex; align-items: center; justify-content: center;
+    z-index: 99;
+    cursor: pointer;
+    transition: opacity 0.3s;
+  }
+  #x svg { pointer-events: none; }
+  body.fs #x { opacity: 0; pointer-events: none; }
+</style>
+</head>
+<body>
+
+<button id="x" title="Tutup" aria-label="Tutup">
+  <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+    <line x1="1" y1="1" x2="11" y2="11" stroke="#555570" stroke-width="1.8" stroke-linecap="round"/>
+    <line x1="11" y1="1" x2="1" y2="11" stroke="#555570" stroke-width="1.8" stroke-linecap="round"/>
+  </svg>
+</button>
+
+<div id="time" aria-live="polite">
+  <span id="hh">00</span><span class="sep">:</span><span id="mm">00</span><span class="sep">:</span><span id="ss">00</span>
+</div>
+<div id="date"></div>
+
+<script>
+  const DAYS   = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
+  const MONTHS = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+
+  const hh = document.getElementById('hh');
+  const mm = document.getElementById('mm');
+  const ss = document.getElementById('ss');
+  const dateEl = document.getElementById('date');
+
+  function pad(n){ return n < 10 ? '0'+n : ''+n; }
+
+  function tick(){
+    const now = new Date();
+    hh.textContent = pad(now.getHours());
+    mm.textContent = pad(now.getMinutes());
+    ss.textContent = pad(now.getSeconds());
+    dateEl.textContent =
+      DAYS[now.getDay()] + ', ' +
+      pad(now.getDate()) + ' ' +
+      MONTHS[now.getMonth()] + ' ' +
+      now.getFullYear();
+  }
+
+  tick();
+  setInterval(tick, 1000);
+
+  // fullscreen
+  let isFull = false;
+  function enterFS(){
+    const el = document.documentElement;
+    const fn = el.requestFullscreen || el.webkitRequestFullscreen || el.mozRequestFullScreen;
+    if(fn) fn.call(el).catch(()=>{});
+    document.body.classList.add('fs');
+    isFull = true;
+    try{ screen.orientation.lock('landscape').catch(()=>{}); }catch(e){}
+  }
+  function exitFS(){
+    const fn = document.exitFullscreen || document.webkitExitFullscreen || document.mozCancelFullScreen;
+    if(fn) fn.call(document).catch(()=>{});
+    document.body.classList.remove('fs');
+    isFull = false;
+    try{ screen.orientation.unlock(); }catch(e){}
+  }
+
+  document.body.addEventListener('click', e => {
+    if(document.getElementById('x').contains(e.target)) return;
+    isFull ? exitFS() : enterFS();
+  });
+  document.getElementById('x').addEventListener('click', e => {
+    e.stopPropagation(); exitFS();
+  });
+  ['fullscreenchange','webkitfullscreenchange'].forEach(ev =>
+    document.addEventListener(ev, () => {
+      if(!document.fullscreenElement && !document.webkitFullscreenElement){
+        document.body.classList.remove('fs'); isFull = false;
+      }
+    })
+  );
+  document.addEventListener('contextmenu', e => e.preventDefault());
+</script>
+</body>
+</html>
